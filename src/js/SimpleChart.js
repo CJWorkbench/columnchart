@@ -102,7 +102,7 @@ export default class SimpleChartParameter extends React.Component {
 
   componentWillMount(props) {
     var defaults = chartConfig.xy.defaultProps;
-    var modelText = workbench.data.wfmodule.parameter_vals[2].value;
+    var modelText = workbench.params.chartstate;
     var newModel = this.loadChartProps(modelText);
     defaults.chartProps.chartSettings[0].type = this.props.chartType || 'line';
     defaults.chartProps.scale.typeSettings.maxLength = 7;
@@ -115,7 +115,7 @@ export default class SimpleChartParameter extends React.Component {
     ChartMetadataStore.addChangeListener(this.onStateChange);
     ErrorStore.addChangeListener(this.onErrorChange);
     SessionStore.addChangeListener(this.onStateChange);
-    ChartViewActions.updateInput('input', this.loadChart(workbench.data.input_data));
+    ChartViewActions.updateInput('input', this.loadChart(workbench.input));
 
     window.addEventListener('message', this.windowWillReceiveData, false);
   }
@@ -149,11 +149,5 @@ export default class SimpleChartParameter extends React.Component {
 }
 
 SimpleChartParameter.propTypes = {
-		wf_module_id:     PropTypes.number,
-		revision:         PropTypes.number,
-		//saveState:        PropTypes.func,
-		//loadState:        PropTypes.func,
-		//saveImageDataURI: PropTypes.func,
-    //isReadOnly:       PropTypes.bool,
     chartType:        PropTypes.string
 }
