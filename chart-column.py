@@ -1,2 +1,2 @@
-def render(wf_module, table):
+def render(table, wf_module):
     return table
