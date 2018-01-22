@@ -16,7 +16,7 @@ module.exports = {
   //devtool: 'source-map', TODO: Source maps aren't useful inlined right now, figure this out
   plugins: [
     new HtmlWebpackPlugin({
-      filename:'index.html',
+      filename:'columnchart.html',
       template:'./html/index.html',
       inlineSource: '.(js|css)$',
     }),
