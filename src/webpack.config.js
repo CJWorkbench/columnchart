@@ -6,7 +6,6 @@ var WebpackCleanPlugin = require('webpack-clean');
 
 module.exports = {
   context: __dirname,
-  // Each page gets its own bundle
   entry: {
     index: './js/index.js'
   },
@@ -14,7 +13,7 @@ module.exports = {
     path: path.resolve('../'),
     filename: "[name].js",
   },
-  devtool: 'inline-source-map',
+  //devtool: 'source-map', TODO: Source maps aren't useful inlined right now, figure this out
   plugins: [
     new HtmlWebpackPlugin({
       filename:'index.html',
@@ -32,6 +31,8 @@ module.exports = {
       {
         test: /\.jsx?$/,
         // chartbuilder and included modules need their jsx compiled, but most node-modules do not
+        // TODO: We do not need all of D3. Come up with a more useful D3 bundle, or import only
+        // what we need in Chartbuilder.
         exclude: /node_modules(?!([\\]+|\/)(react-tangle|chartbuilder))/,
         loader: 'babel-loader',
         query: {presets: ['env', 'react']}  // to transform JSX into JS

@@ -18,6 +18,9 @@ var ChartMetadataStore = require("chartbuilder/src/js/stores/ChartMetadataStore"
 var SessionStore = require("chartbuilder/src/js/stores/SessionStore");
 var ErrorStore = require("chartbuilder/src/js/stores/ErrorStore");
 
+// Do we actually need to do require for these?
+var ChartExport = require("chartbuilder/src/js/components/ChartExport");
+
 require("../css/chartbuilder_fonts_colors.css")
 require("../css/chartbuilder.css");
 
@@ -134,13 +137,24 @@ export default class SimpleChartParameter extends React.Component {
   render() {
     if (typeof this.state.chartProps !== 'undefined' > 0 && this.state.metadata)  {
       return (
-        <RendererWrapper
-          editable={false}
-          showMetadata={true}
-          model={this.state}
-          enableResponsive={true}
-          className="render-svg-mobile"
-          svgClassName={this.props.renderedSVGClassName} />
+        <div>
+          <ChartExport
+            data={this.state.chartProps.data}
+            enableJSONExport={false}
+            svgWrapperClassName="render-svg-mobile"
+            metadata={this.state.metadata}
+            stepNumber={'19'}
+            additionalComponents={null}
+            model={this.state}
+          />
+          <RendererWrapper
+            editable={false}
+            showMetadata={true}
+            model={this.state}
+            enableResponsive={true}
+            className="render-svg-mobile"
+            svgClassName="rendered-svg-class-name" />
+        </div>
       )
     } else {
       return <div></div>;

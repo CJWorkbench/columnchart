@@ -1,6 +1,6 @@
 {
   "name": "Column Chart",
-  "id_name": "chart-column",
+  "id_name": "columnchart",
   "category" : "Visualize",
   "icon" : "chart",
   "description" : "Create a column chart.",

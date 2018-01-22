@@ -3,9 +3,11 @@ import ReactDOM from 'react-dom'
 import SimpleChartParameter from './SimpleChart'
 
 ReactDOM.render(
-    <SimpleChartParameter
-      chartType='column'
-      renderedSVGClassName='who-cares'
-    ></SimpleChartParameter>,
+    <div>
+      <SimpleChartParameter
+        chartType='line'
+        renderedSVGClassName='who-cares'
+      ></SimpleChartParameter>
+    </div>,
     document.getElementById('root')
 );
