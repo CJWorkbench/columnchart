@@ -1,6 +1,6 @@
 ## Synopsis
 
-Displays a bar chart based on your data in Workbench
+Displays a column chart based on your data in Workbench
 
 ## Installation
 
