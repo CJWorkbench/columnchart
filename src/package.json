@@ -12,7 +12,8 @@
     "react": "^15.6.2",
     "react-dom": "^15.6.2",
     "reactstrap": "^4.8.0",
-    "save-svg-as-png": "^1.2.0"
+    "save-svg-as-png": "^1.2.0",
+    "url-loader": "^0.6.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

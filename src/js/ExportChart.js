@@ -30,21 +30,27 @@ export default class ExportChart extends React.Component {
 
     render() {
         return (
-            <Dropdown isOpen={this.state.dropdownOpen} toggle={this.toggle}>
-              <DropdownToggle
-                tag="div"
-                className="export-button"
-                onClick={this.toggle}
-                data-toggle="dropdown"
-                aria-expanded={this.state.dropdownOpen}
-              >
-                Export Icon
-              </DropdownToggle>
-              <DropdownMenu className={this.state.dropdownOpen ? 'show' : ''} right>
-                  <div onClick={this.exportSvg}>SVG</div><br />
-                  <div onClick={this.exportPng}>PNG</div>
-              </DropdownMenu>
-            </Dropdown>
+              <Dropdown isOpen={this.state.dropdownOpen} toggle={this.toggle}>
+                <DropdownToggle
+                  tag="div"
+                  className="export-button btn icon-download"
+                  onClick={this.toggle}
+                  data-toggle=""
+                  aria-expanded={this.state.dropdownOpen}
+                >
+                </DropdownToggle>
+                <div className='button-wrapper'>
+                  <DropdownMenu className={this.state.dropdownOpen ? 'show' : ''} left>
+                      <div className='dropdown-menu-item' onClick={this.exportSvg}>
+                        <span className='t-d-gray content-3 ml-3'>SVG</span>
+                      </div>
+                      <div className='dropdown-menu-item' onClick={this.exportPng}>
+                        <span className='t-d-gray content-3 ml-3'>PNG</span>
+                      </div>
+                  </DropdownMenu>
+                </div>
+              </Dropdown>
+
         )
     }
 }
