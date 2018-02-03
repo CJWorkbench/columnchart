@@ -110,7 +110,7 @@ export default class SimpleChartParameter extends React.Component {
 
     let data = this.loadChart(workbench.input);
 
-    let modelText = workbench.params.chartstate;
+    let modelText = workbench.params.chart_editor;
     let newModel = this.loadChartProps(modelText, data);
     ChartServerActions.receiveModel(newModel);
     ChartViewActions.updateInput('input', data);
