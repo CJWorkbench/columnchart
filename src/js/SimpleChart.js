@@ -7,6 +7,7 @@ import ExportChart from './ExportChart'
 
 var ChartViewActions = require("chartbuilder/src/js/actions/ChartViewActions");
 var chartConfig = require("chartbuilder/src/js/charts/chart-type-configs");
+
 //var saveSvgAsPng = require("save-svg-as-png");
 
 /* Flux stores */
@@ -89,7 +90,8 @@ export default class SimpleChartParameter extends React.Component {
     let defaults = chartConfig.xy.defaultProps;
 
     defaults.chartProps.chartSettings[0].type = this.props.chartType || 'line';
-    defaults.chartProps.scale.typeSettings.maxLength = 7;
+    defaults.chartProps.scale.typeSettings.maxLength = 15;
+    defaults.chartProps.scale.typeSettings.tickFont = '10px Khula-Light';
 
     if (modelText !== "") {
       model = JSON.parse(modelText);
