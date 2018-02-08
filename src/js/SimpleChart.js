@@ -50,6 +50,10 @@ export default class SimpleChartParameter extends React.Component {
     this.onErrorChange = this.onErrorChange.bind(this);
     this.loadChartProps = this.loadChartProps.bind(this);
     this.windowWillReceiveData = this.windowWillReceiveData.bind(this);
+    // Refs can't be passed directly in the render function from parent to child, so instead we set a variable and
+    // define a getter function that the child component can call.
+    this.parentRef = null;
+    this.getParentRef = this.getParentRef.bind(this);
   }
 
   // called when any change is made to chart. Update error status.
@@ -132,19 +136,23 @@ export default class SimpleChartParameter extends React.Component {
     ChartServerActions.receiveModel(event.data.model);
   }
 
+  getParentRef() {
+    return this.parentRef;
+  }
+
   render() {
     if (!this.state.loading && typeof this.state.errors !== 'undefined')  {
       return (
-        <div>
+        <div ref={(ref) => {this.parentRef = ref}}>
           <ExportChart targetSvgWrapperClassname="rendered-svg" />
           <RendererWrapper
             editable={false}
             showMetadata={true}
             model={this.state}
             enableResponsive={true}
-            height="100%"
             className="rendered-svg"
-            svgClassName="rendered-svg-class-name" />
+            svgClassName="rendered-svg-class-name"
+            parentRef={this.getParentRef} />
         </div>
       )
     } else {
@@ -155,4 +163,4 @@ export default class SimpleChartParameter extends React.Component {
 
 SimpleChartParameter.propTypes = {
     chartType:        PropTypes.string
-}
+};
