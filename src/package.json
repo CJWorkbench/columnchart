@@ -7,7 +7,7 @@
     "bootstrap": "^4.0.0",
     "chartbuilder": "git://github.com/CJWorkbench/Chartbuilder.git#library-style",
     "chartbuilder-ui": "git://github.com/CJWorkbench/chartbuilder-ui.git#workbench-integration",
-    "d3": "^4.12.2",
+    "d3": "^4.13.0",
     "lodash.debounce": "^4.0.8",
     "react": "^15.6.2",
     "react-dom": "^15.6.2",
