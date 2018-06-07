@@ -68,8 +68,8 @@ containing divs
 }
 
 .export-button {
-  width:4rem;
-  height:4rem;
+  width:3.5rem;
+  height:3.5rem;
   border-radius:50px;
   display:flex;
   justify-content: center;
@@ -77,12 +77,12 @@ containing divs
   position:absolute;
   right:1.5rem;
   top:1.5rem;
-  border: 1px solid #E7E7E7;
+  border: 2px solid #E7E7E7;
   font-size: 2rem
 }
 
 .export-button:hover{
-  background-color: #48C8D7;
+  background-color: #f4fcfd;
   border:0px;
   color:#fff;
 
