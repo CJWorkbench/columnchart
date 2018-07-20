@@ -8,17 +8,42 @@
   "help_url":"modules/visualization/column-and-line-charts",
   "parameters": [
     {
-      "name": "Chart Options",
-      "id_name": "chart_editor",
-      "type": "custom",
-      "ui-only": true
+      "name": "Chart Title",
+      "id_name": "title",
+      "type": "string",
+      "placeholder": "Chart title",
     },
     {
-      "name": "Chart Type",
-      "id_name": "chart_type",
+      "name": "X axis",
+      "id_name": "x_axis_statictext",
+      "type": "statictext"
+    },
+    {
+      "name": "Label",
+      "id_name": "x_axis_label",
       "type": "string",
-      "default": "column",
-      "visible": false
+      "placeholder": "Label"
+    },
+    {
+      "name": "Column",
+      "id_name": "x_column",
+      "type": "column"
+    },
+    {
+      "name": "Y axis",
+      "id_name": "y_axis_statictext",
+      "type": "statictext"
+    },
+    {
+      "name": "Label",
+      "id_name": "y_axis_label",
+      "type": "string",
+      "placeholder": "Label"
+    },
+    {
+      "name": "Columns",
+      "id_name": "y_columns",
+      "type": "custom"
     }
   ]
 }
