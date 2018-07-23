@@ -151,7 +151,8 @@ class SeriesParams:
             ret["legends"] = [
                 {
                     "title": "Legend",
-                    "fill": "color"
+                    "fill": "color",
+                    "symbolType": "square",
                 },
             ]
 
