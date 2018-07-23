@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import Any, Dict, List
 import pandas
 
 
@@ -31,9 +31,131 @@ class SeriesParams:
         self.x_series = x_series
         self.y_columns = y_columns
 
-    def to_vega_data_values(self):
-        """Build a dict for Vega's .data.values Array"""
-        def build_record(i):
+    def to_vega_data_values(self) -> List[Dict[str, Any]]:
+        """
+        Build a dict for Vega's .data.values Array.
+
+        Return value is a list of dict records. Each has
+        {x_series.name: 'X Name', 'bar': 'Bar Name', 'y': 1.0}
+        """
+        data = {
+            self.x_series.name: self.x_series.series,
+        }
+        for y_column in self.y_columns:
+            data[y_column.name] = y_column.series
+        dataframe = pandas.DataFrame(data)
+        return dataframe.melt(self.x_series.name, var_name='bar',
+                              value_name='y').to_dict(orient='records')
+
+    def to_vega(self) -> Dict[str, Any]:
+        """
+        Build a Vega bar chart or grouped bar chart.
+        """
+        ret = {
+            "$schema": "https://vega.github.io/schema/vega/v4.json",
+            "title": self.title,
+
+            "data": [
+                {
+                    "name": "table",
+                    "values": self.to_vega_data_values(),
+                }
+            ],
+
+            "scales": [
+                {
+                    "name": "xscale",
+                    "type": "band",
+                    "domain": {"data": "table", "field": self.x_series.name},
+                    "range": "width",
+                    "padding": 0.2
+                },
+                {
+                    "name": "yscale",
+                    "type": "linear",
+                    "domain": {"data": "table", "field": "y"},
+                    "range": "height",
+                    "zero": True,
+                    "nice": True,
+                },
+                {
+                    "name": "color",
+                    "type": "ordinal",
+                    "domain": {"data": "table", "field": "bar"},
+                    "range": [ys.color for ys in self.y_columns],
+                }
+            ],
+
+            "axes": [
+                {"orient": "bottom", "scale": "xscale", "tickSize": 0,
+                 "labelPadding": 4, "zindex": 1, "title": self.x_axis_label},
+
+                {"orient": "left", "scale": "yscale",
+                 "title": self.y_axis_label},
+            ],
+
+            "marks": [
+                {
+                    "type": "group",
+
+                    "from": {
+                        "facet": {
+                            "data": "table",
+                            "name": "facet",
+                            "groupby": self.x_series.name,
+                        }
+                    },
+
+                    "encode": {
+                        "enter": {
+                            "x": {"scale": "xscale",
+                                  "field": self.x_series.name},
+                        }
+                    },
+
+                    "signals": [
+                        {"name": "width", "update": "bandwidth('xscale')"}
+                    ],
+
+                    "scales": [
+                        {
+                            "name": "pos",
+                            "type": "band",
+                            "range": "width",
+                            "domain": {"data": "facet", "field": "bar"},
+                        }
+                    ],
+
+                    "marks": [
+                        {
+                            "name": "bars",
+                            "from": {"data": "facet"},
+                            "type": "rect",
+                            "encode": {
+                                "enter": {
+                                    "x": {"scale": "pos", "field": "bar"},
+                                    "width": {"scale": "pos", "band": 1},
+                                    "y": {"scale": "yscale", "field": "y"},
+                                    "y2": {"scale": "yscale", "value": 0},
+                                    "fill": {"scale": "color",
+                                             "field": "bar"},
+                                }
+                            }
+                        }
+                    ]
+                }
+            ],
+        }
+
+        if len(self.y_columns) > 1:
+            ret["legends"] = [
+                {
+                    "title": "Legend",
+                    "fill": "color"
+                },
+            ]
+
+        return ret
 
 
 class YColumn:
@@ -46,14 +168,26 @@ class UserParams:
     """
     Parameter dict specified by the user: valid types, unchecked values.
     """
-    def __init__(self, params):
-        self.title = str(params.get('title', ''))
-        self.x_axis_label = str(params.get('x_axis_label', ''))
-        self.y_axis_label = str(params.get('y_axis_label', ''))
-        self.x_column = str(params.get('x_column', ''))
-        self.y_columns = UserParams.parse_y_columns(
+    def __init__(self, *, title: str, x_axis_label: str, y_axis_label: str,
+                 x_column: str, y_columns: List[YColumn]):
+        self.title = title
+        self.x_axis_label = x_axis_label
+        self.y_axis_label = y_axis_label
+        self.x_column = x_column
+        self.y_columns = y_columns
+
+    @staticmethod
+    def from_params(params: Dict[str, Any]) -> 'UserParams':
+        title = str(params.get('title', ''))
+        x_axis_label = str(params.get('x_axis_label', ''))
+        y_axis_label = str(params.get('y_axis_label', ''))
+        x_column = str(params.get('x_column', ''))
+        y_columns = UserParams.parse_y_columns(
             params.get('y_columns', 'null')
         )
+        return UserParams(title=title, x_axis_label=x_axis_label,
+                          y_axis_label=y_axis_label, x_column=x_column,
+                          y_columns=y_columns)
 
     def validate_with_table(self, table: pandas.DataFrame) -> SeriesParams:
         """
@@ -79,7 +213,7 @@ class UserParams:
 
         x_series = XSeries(table[self.x_column].astype(str), self.x_column)
 
-        y_series = []
+        y_columns = []
         for ycolumn in self.y_columns:
             if ycolumn.column not in table.columns:
                 raise ValueError(
@@ -94,18 +228,17 @@ class UserParams:
 
             series = table[ycolumn.column]
             floats = pandas.to_numeric(series, errors='coerce')
-            floats.fillna(0.0)
-            y_series.append(YSeries(floats, ycolumn.column, ycolumn.color))
+            floats.fillna(0.0, inplace=True)
+            y_columns.append(YSeries(floats, ycolumn.column, ycolumn.color))
 
         return SeriesParams(title=self.title, x_axis_label=self.x_axis_label,
                             y_axis_label=self.y_axis_label, x_series=x_series,
-                            y_series=y_series)
-
+                            y_columns=y_columns)
 
     @staticmethod
     def parse_y_columns(s):
         try:
-            arr = json.parse(s)
+            arr = json.loads(s)
             return [YColumn(str(o.get('column', '')),
                             str(o.get('color', '#000000')))
                     for o in arr]
@@ -127,10 +260,5 @@ def render(table, params):
     except ValueError as err:
         return (table, str(err), {})
 
-
-    json_dict = {
-        '$schema': 'https://vega.github.io/schema/vega-lite/v2.0.json',
-        'data': {'values': values},
-    }
-
-    return (table, error, json_dict)
+    json_dict = valid_params.to_vega()
+    return (table, '', json_dict)

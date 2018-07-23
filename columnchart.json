@@ -11,7 +11,7 @@
       "name": "Chart Title",
       "id_name": "title",
       "type": "string",
-      "placeholder": "Chart title",
+      "placeholder": "Chart title"
     },
     {
       "name": "X axis",
