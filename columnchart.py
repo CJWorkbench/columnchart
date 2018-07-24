@@ -100,9 +100,9 @@ class SeriesParams:
 
             "axes": [
                 {"orient": "bottom", "scale": "xscale", "tickSize": 0,
-                 "labelPadding": 4, "zindex": 1, "title": self.x_axis_label},
+                 "title": self.x_axis_label},
 
-                {"orient": "left", "scale": "yscale",
+                {"orient": "left", "scale": "yscale", "labelOverlap": True,
                  "title": self.y_axis_label},
             ],
 

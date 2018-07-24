@@ -5,7 +5,7 @@
     <title>Column Chart output</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vega-embed@3/vega-embed.css">
     <style>
-      html, body, main {
+      html, body {
         box-sizing: border-box;
         padding: 0;
         margin: 0;
@@ -15,20 +15,27 @@
         background: white;
       }
 
-      html {
-        padding: 1rem;
+      main {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        bottom: 1rem;
+        right: 1rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+
+      #vega {
+        padding-right: 0; /* override vega-embed.css */
       }
     </style>
   </head>
   <body>
-    <main></main>
+    <main><div id="vega"></div></main>
     <script src="https://cdn.jsdelivr.net/npm/vega@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@3"></script>
     <script>
-      const main = document.querySelector('main')
-      let vegaViewPromise = Promise.resolve(null)
-
       const loadingSpec = {
         "title": "loading",
         "mark": "point",
@@ -55,20 +62,27 @@
         }
       }
 
-      function renderData(spec) {
-        if (!spec) {
-          spec = errorSpec('no data')
-        } else if (spec.error) {
-          spec = errorSpec(spec.error)
+      const el = document.querySelector('#vega')
+      let lastSpec = loadingSpec
+      let lastViewPromise = null
+
+      function renderSpec (spec) {
+        if (lastViewPromise !== null) {
+          lastViewPromise.then(view => view.view.finalize())
         }
 
-        vegaViewPromise = vegaEmbed(main, spec, {
+        const sizedSpec = Object.assign({}, spec, {
+          width: el.parentNode.clientWidth,
+          height: el.parentNode.clientHeight,
+          autosize: {
+            type: 'fit',
+            contains: 'padding'
+          },
+        })
+
+        return lastViewPromise = vegaEmbed(el, sizedSpec, {
           renderer: 'svg', // helps us integration-test
           config: {
-            autosize: {
-              type: 'fit',
-              contains: 'padding'
-            },
             style: {
               cell: {
                 stroke: 'transparent',
@@ -76,7 +90,79 @@
             },
           }
         })
-        resetSize()
+      }
+
+      function areXAxisLabelsOverlapping () {
+        // Assumptions:
+        //
+        // x-axis ticks have no height
+        // texts are arranged from left to right
+
+        let xAxis = null
+        const axisTicks = document.querySelectorAll('g.role-axis-tick')
+        if (!axisTicks.length) return // we're displaying a message, not a chart
+        for (let i = 0; i < axisTicks.length; i++) {
+          if (axisTicks[i].getBoundingClientRect().height === 0) {
+            xAxis = axisTicks[i].parentNode
+          }
+        }
+
+        if (xAxis === null) {
+          console.warn('Could not find x axis because of invalid assumptions')
+          return
+        }
+
+        const labels = xAxis.querySelectorAll('.role-axis-label text')
+        const margin = 3
+        let maxX = 0
+        for (let i = 0; i < labels.length; i++) {
+          const label = labels[i]
+          const rect = label.getBoundingClientRect()
+          const left = rect.x
+          const right = rect.x + rect.width
+          if (maxX + margin > left) return true
+          maxX = right
+        }
+        return false
+      }
+
+      function slantXAxisLabelsIfNeeded ({ spec, view }) {
+        if (areXAxisLabelsOverlapping()) {
+          const newSpec = JSON.parse(JSON.stringify(spec))
+          const xAxis = newSpec.axes[0]
+          Object.assign(xAxis, {
+            labelAlign: 'right',
+            labelBaseline: 'middle',
+            labelAngle: -45,
+            tickSize: 5
+          })
+          renderSpec(newSpec)
+        }
+      }
+
+      function reRender () {
+        renderSpec(lastSpec)
+          .then(slantXAxisLabelsIfNeeded)
+      }
+
+      function onResize () {
+        // Ignore the spec we rendered last time, because it may use slanted
+        // X-axis labels and we may have resized such that we don't need them.
+        // Re-render the canonical chart, and then re-slant the X-axis labels
+        // if need be.
+        reRender()
+      }
+
+      function renderData (spec) {
+        if (!spec) {
+          lastSpec = errorSpec('no data')
+        } else if (spec.error) {
+          lastSpec = errorSpec(spec.error)
+        } else {
+          lastSpec = spec
+        }
+
+        reRender()
       }
 
       function startLoading () {
@@ -95,20 +181,8 @@
           .catch(console.error)
       }
 
-      function resetSize() {
-        vegaViewPromise.then(function (view) {
-          if (view === null) return // init
-          const width = document.body.clientWidth
-          const height = document.body.clientHeight
-          view.view
-            .width(width)
-            .height(height)
-            .run()
-        })
-      }
-
       window.addEventListener('hashchange', startLoading)
-      window.addEventListener('resize', resetSize)
+      window.addEventListener('resize', onResize)
 
       renderData(window.workbench.embeddata)
     </script>
