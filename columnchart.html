@@ -63,6 +63,7 @@
         }
 
         vegaViewPromise = vegaEmbed(main, spec, {
+          renderer: 'svg', // helps us integration-test
           config: {
             autosize: {
               type: 'fit',
