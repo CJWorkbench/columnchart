@@ -19,15 +19,16 @@
       "type": "statictext"
     },
     {
-      "name": "Label",
+      "name": "",
+      "id_name": "x_column",
+      "type": "column",
+      "placeholder": "Select X-Axis Column"
+    },
+    {
+      "name": "",
       "id_name": "x_axis_label",
       "type": "string",
       "placeholder": "Label"
-    },
-    {
-      "name": "Column",
-      "id_name": "x_column",
-      "type": "column"
     },
     {
       "name": "Y axis",
@@ -35,7 +36,7 @@
       "type": "statictext"
     },
     {
-      "name": "Label",
+      "name": "",
       "id_name": "y_axis_label",
       "type": "string",
       "placeholder": "Label"

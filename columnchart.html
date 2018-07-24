@@ -41,13 +41,15 @@
         }
       }
 
-      const emptySpec = {
-        "title": "no data",
-        "mark": "point",
-        "config": {
-          "style": {
-            "cell": {
-              "stroke": "transparent"
+      function errorSpec (message) {
+        return {
+          "title": message,
+          "mark": "point",
+          "config": {
+            "style": {
+              "cell": {
+                "stroke": "transparent"
+              }
             }
           }
         }
@@ -55,7 +57,9 @@
 
       function renderData(spec) {
         if (!spec) {
-          spec = emptySpec
+          spec = errorSpec('no data')
+        } else if (spec.error) {
+          spec = errorSpec(spec.error)
         }
 
         vegaViewPromise = vegaEmbed(main, spec, {

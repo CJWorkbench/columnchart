@@ -6,6 +6,18 @@ import pandas
 MaxNBars = 500
 
 
+class GentleValueError(ValueError):
+    """
+    A ValueError that should not display in red to the user.
+
+    On first load, we don't want to display an error, even though the user
+    hasn't selected what to chart. So we'll display the error in the iframe:
+    we'll be gentle with the user.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 class XSeries:
     def __init__(self, series: pandas.Series, name: str):
         self.series = series
@@ -195,9 +207,10 @@ class UserParams:
         Create a SeriesParams ready for charting, or raises ValueError.
 
         Features ([tested?]):
-        [ ] Error if too many bars
         [ ] Error if X column is missing
         [ ] Error if no Y columns chosen
+        [ ] Error if no rows
+        [ ] Error if too many bars
         [ ] Error if a Y column is missing
         [ ] Error if a Y column is the X column
         """
@@ -208,9 +221,9 @@ class UserParams:
             )
 
         if self.x_column not in table.columns:
-            raise ValueError('Please choose an X-axis column')
+            raise GentleValueError('Please choose an X-axis column')
         if not self.y_columns:
-            raise ValueError('Please choose a Y-axis column')
+            raise GentleValueError('Please choose a Y-axis column')
 
         x_series = XSeries(table[self.x_column].astype(str), self.x_column)
 
@@ -231,6 +244,9 @@ class UserParams:
             floats = pandas.to_numeric(series, errors='coerce')
             floats.fillna(0.0, inplace=True)
             y_columns.append(YSeries(floats, ycolumn.column, ycolumn.color))
+
+        if not len(table):
+            raise GentleValueError('no records to plot')
 
         return SeriesParams(title=self.title, x_axis_label=self.x_axis_label,
                             y_axis_label=self.y_axis_label, x_series=x_series,
@@ -258,8 +274,10 @@ def render(table, params):
     user_params = UserParams.from_params(params)
     try:
         valid_params = user_params.validate_with_table(table)
+    except GentleValueError as err:
+        return (table, '', {'error': str(err)})
     except ValueError as err:
-        return (table, str(err), {})
+        return (table, str(err), {'error': str(err)})
 
     json_dict = valid_params.to_vega()
     return (table, '', json_dict)
