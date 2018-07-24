@@ -213,6 +213,7 @@ class UserParams:
         [ ] Error if too many bars
         [ ] Error if a Y column is missing
         [ ] Error if a Y column is the X column
+        [ ] Default title, X and Y axis labels
         """
         if len(table.index) >= MaxNBars:
             raise ValueError(
@@ -248,8 +249,12 @@ class UserParams:
         if not len(table):
             raise GentleValueError('no records to plot')
 
-        return SeriesParams(title=self.title, x_axis_label=self.x_axis_label,
-                            y_axis_label=self.y_axis_label, x_series=x_series,
+        title = self.title or 'Column Chart'
+        x_axis_label = self.x_axis_label or x_series.name
+        y_axis_label = self.y_axis_label or y_columns[0].name
+
+        return SeriesParams(title=title, x_axis_label=x_axis_label,
+                            y_axis_label=y_axis_label, x_series=x_series,
                             y_columns=y_columns)
 
     @staticmethod
