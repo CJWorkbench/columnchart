@@ -218,7 +218,7 @@ class UserParams:
         if len(table.index) >= MaxNBars:
             raise ValueError(
                 f'Refusing to build column chart with '
-                'more than {MaxNBars} bars'
+                f'more than {MaxNBars} bars'
             )
 
         if self.x_column not in table.columns:
