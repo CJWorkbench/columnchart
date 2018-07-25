@@ -28,7 +28,7 @@ To add a feature on the HTML/JavaScript side:
 
 To develop continuously on Workbench:
 
-1. Check the columnchart repository out in a sibling directory to your checked-out Workbench code.
+1. Check out the columnchart repository in a sibling directory to your checked-out Workbench code.
 2. Start Workbench with ``CACHE_MODULES=false bin/dev``
 3. In a separate tab in the Workbench directory, run ``pipenv run ./manage.py develop-module ../columnchart https://github.com/CJWorkbench/columnchart.git``
 4. Edit this code; the module will be reloaded in Workbench immediately
