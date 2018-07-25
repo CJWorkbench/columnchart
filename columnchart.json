@@ -8,7 +8,7 @@
   "help_url":"modules/visualization/column-and-line-charts",
   "parameters": [
     {
-      "name": "Chart Title",
+      "name": "",
       "id_name": "title",
       "type": "string",
       "placeholder": "Chart title"
