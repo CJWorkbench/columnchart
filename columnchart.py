@@ -65,7 +65,13 @@ class SeriesParams:
         """
         ret = {
             "$schema": "https://vega.github.io/schema/vega/v4.json",
-            "title": self.title,
+            "title": {
+                "text": self.title,
+                "color": '#383838',
+                "font": "Nunito Sans, Helvetica, sans-serif",
+                "fontSize": 20,
+                "fontWeight": "normal"
+            },
 
             "data": [
                 {
@@ -80,7 +86,7 @@ class SeriesParams:
                     "type": "band",
                     "domain": {"data": "table", "field": self.x_series.name},
                     "range": "width",
-                    "padding": 0.2
+                    "padding": 0.15,
                 },
                 {
                     "name": "yscale",
@@ -99,11 +105,33 @@ class SeriesParams:
             ],
 
             "axes": [
-                {"orient": "bottom", "scale": "xscale", "tickSize": 0,
-                 "title": self.x_axis_label},
-
-                {"orient": "left", "scale": "yscale", "labelOverlap": True,
-                 "title": self.y_axis_label},
+                {
+                    "orient": "bottom",
+                    "scale": "xscale",
+                    "tickSize": 3,
+                    "title": self.x_axis_label,
+                    "titlePadding": 15,
+                    "titleColor": "#686768",
+                    "titleFontSize": 13,
+                    "titleFontWeight": 100,
+                    "labelPadding": 8,
+                    "labelFontSize": 11,
+                    "labelColor":"#383838",
+                },
+                {
+                    "orient": "left",
+                    "scale": "yscale",
+                    "tickSize": 3,
+                    "labelOverlap": True,
+                    "title": self.y_axis_label,
+                    "titleFontSize": 13,
+                    "titleFontWeight": 100,
+                    "titleColor": "#686768",
+                    "titlePadding": 15,
+                    "labelPadding": 10,
+                    "labelFontSize": 11,
+                    "labelColor": "#383838"
+                },
             ],
 
             "marks": [
@@ -162,9 +190,12 @@ class SeriesParams:
         if len(self.y_columns) > 1:
             ret["legends"] = [
                 {
-                    "title": "Legend",
                     "fill": "color",
-                    "symbolType": "square",
+                    "symbolType": "circle",
+                    "padding": 15,
+                    "offset": 0,
+                    "labelFontSize": 12,
+                    "rowPadding": 10,
                 },
             ]
 
