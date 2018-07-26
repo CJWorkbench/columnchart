@@ -66,6 +66,18 @@
         background: white;
       }
 
+      .vega-actions-wrapper::after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 10%;
+        left: 10%;
+        width: 80%;
+        height: 80%;
+        background: url('data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwOTciIGhlaWdodD0iMTAyNCIgdmlld0JveD0iMCAwIDEwOTcgMTAyNCI+PHBhdGggc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSI1MCIgZD0iTTM2LjU3MSA1NDguNTcxaDczLjE0M3YzNjUuNzE0aDg3Ny43MTR2LTM2NS43MTRoNzMuMTQzdjQzOC44NTdoLTEwMjR6TTUyOS41MTYgMGg1NS4yOHY2NzMuMjMxbDE1My42ODktMTY3LjE4NiAzOC4yMiA0MC4zOTgtMjE4LjU3MyAyNDIuNDc5LTIxOS4wMTUtMjQyLjQ3OSAzOS4wMjgtNDAuMzk4IDE1MS4zNzEgMTY3LjE4NnYtNTA1LjAwMnoiPjwvcGF0aD48L3N2Zz4K');
+        background-size: contain;
+      }
+
       .vega-embed .vega-actions-wrapper:hover .vega-actions {
         display: flex;
       }
