@@ -122,7 +122,7 @@ class SeriesParams:
                     "labelPadding": 10,
                     "labelFontSize": 12,
                     "labelColor":"#383838",
-                    "labelOverlap":"true",
+                    
                 },
                 {
                     "title": self.y_axis_label,
