@@ -68,7 +68,7 @@ class SeriesParams:
             "background": "white",
             "title": {
                 "text": self.title,
-                "offset": 10,
+                "offset": 15,
                 "color": '#383838',
                 "font": "Nunito Sans, Helvetica, sans-serif",
                 "fontSize": 20,
