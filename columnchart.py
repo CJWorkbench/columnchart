@@ -260,7 +260,7 @@ class UserParams:
         """
         if len(table.index) >= MaxNBars:
             raise ValueError(
-                f'Column chart can visualize'
+                f'Column chart can visualize '
                 f'a maximum of {MaxNBars} bars'
             )
 
