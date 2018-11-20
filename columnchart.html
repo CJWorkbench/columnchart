@@ -113,7 +113,7 @@
     <main><div id="vega"></div></main>
     <script src="https://cdn.jsdelivr.net/npm/vega@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@3.23.1"></script>
     <script>
       const loadingSpec = {
         "title": "loading",
@@ -266,7 +266,7 @@
       window.addEventListener('hashchange', startLoading)
       window.addEventListener('resize', onResize)
 
-      renderData(window.workbench.embeddata)
+      startLoading()
     </script>
   </body>
 </html>
