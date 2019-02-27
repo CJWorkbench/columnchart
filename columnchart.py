@@ -274,8 +274,8 @@ class Form:
             params.get('y_columns', 'null')
         )
         return Form(title=title, x_axis_label=x_axis_label,
-                          y_axis_label=y_axis_label, x_column=x_column,
-                          y_columns=y_columns)
+                    y_axis_label=y_axis_label, x_column=x_column,
+                    y_columns=y_columns)
 
     def validate_with_table(self, table: pandas.DataFrame) -> SeriesParams:
         """
