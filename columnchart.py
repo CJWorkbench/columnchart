@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+from string import Formatter
 from typing import Any, Dict, List
 import pandas
 from pandas.api.types import is_numeric_dtype
@@ -50,6 +51,7 @@ class SeriesParams:
     y_axis_label: str
     x_series: XSeries
     y_columns: List[YSeries]
+    y_label_format: str
 
     def to_vega_data_values(self) -> List[Dict[str, Any]]:
         """
@@ -167,6 +169,7 @@ class SeriesParams:
                 },
                 {
                     "title": self.y_axis_label,
+                    "format": self.y_label_format,
                     "orient": "left",
                     "scale": "yscale",
                     "tickSize": 3,
@@ -276,7 +279,8 @@ class Form:
     def from_params(cls, *, y_columns: List[Dict[str, str]], **kwargs) -> Form:
         return Form(**kwargs, y_columns=[YColumn(**y) for y in y_columns])
 
-    def validate_with_table(self, table: pandas.DataFrame) -> SeriesParams:
+    def validate_with_table(self, table: pandas.DataFrame,
+                            input_columns: Dict[str, Any]) -> SeriesParams:
         """
         Create a SeriesParams ready for charting, or raises ValueError.
 
@@ -329,10 +333,12 @@ class Form:
         title = self.title or 'Column Chart'
         x_axis_label = self.x_axis_label or x_series.name
         y_axis_label = self.y_axis_label or y_columns[0].name
+        y_label_python_format = input_columns[y_columns[0].name].format
+        y_label_format = next(Formatter().parse(y_label_python_format))[2]
 
         return SeriesParams(title=title, x_axis_label=x_axis_label,
                             y_axis_label=y_axis_label, x_series=x_series,
-                            y_columns=y_columns)
+                            y_columns=y_columns, y_label_format=y_label_format)
 
 
 def _migrate_params_v0_to_v1(params):
@@ -360,10 +366,10 @@ def migrate_params(params):
     return params
 
 
-def render(table, params):
+def render(table, params, *, input_columns):
     form = Form.from_params(**params)
     try:
-        valid_params = form.validate_with_table(table)
+        valid_params = form.validate_with_table(table, input_columns)
     except GentleValueError as err:
         return (table, '', {'error': str(err)})
     except ValueError as err:
