@@ -11,6 +11,25 @@ from pandas.api.types import is_numeric_dtype
 MaxNBars = 500
 
 
+def python_format_to_d3_tick_format(python_format: str) -> str:
+    """
+    Build a d3-scale tickFormat specification based on Python str.
+
+    >>> python_format_to_d3_tick_format('{:,.2f}')
+    ',.2f'
+    >>> # d3-scale likes to mess about with precision. Its "r" format does
+    >>> # what we want; if we left it blank, we'd see format(30) == '3e+1'.
+    >>> python_format_to_d3_tick_format('{:,}')
+    ',r'
+    """
+    # Formatter.parse() returns Iterable[(literal, field_name, format_spec,
+    # conversion)]
+    specifier = next(Formatter().parse(python_format))[2]
+    if specifier[-1] not in 'bcdoxXneEfFgGn%':
+        specifier += 'r'
+    return specifier
+
+
 class GentleValueError(ValueError):
     """
     A ValueError that should not display in red to the user.
@@ -169,24 +188,7 @@ class SeriesParams:
                 },
                 {
                     "title": self.y_axis_label,
-                    # NOT "format": self.y_label_format
-                    # because https://github.com/vega/vega/issues/1760
-                    # instead, here's a wild workaround until that's fixed
-                    "encode": {
-                        "labels": {
-                            "update": {
-                                "text": {
-                                    "signal": (
-                                        "format(datum.value, '"
-                                        # Don't worry about escaping: Python
-                                        # format specs don't have apostrophes.
-                                        + self.y_label_format
-                                        + "')"
-                                    )
-                                }
-                            }
-                        }
-                    },
+                    "format": self.y_label_format,
                     "orient": "left",
                     "scale": "yscale",
                     "tickSize": 3,
@@ -350,8 +352,9 @@ class Form:
         title = self.title or 'Column Chart'
         x_axis_label = self.x_axis_label or x_series.name
         y_axis_label = self.y_axis_label or y_columns[0].name
-        y_label_python_format = input_columns[y_columns[0].name].format
-        y_label_format = next(Formatter().parse(y_label_python_format))[2]
+        y_label_format = python_format_to_d3_tick_format(
+            input_columns[y_columns[0].name].format
+        )
 
         return SeriesParams(title=title, x_axis_label=x_axis_label,
                             y_axis_label=y_axis_label, x_series=x_series,

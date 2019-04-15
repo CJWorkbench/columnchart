@@ -94,7 +94,7 @@ class IntegrationTest(unittest.TestCase):
             ),
             input_columns={
                 'A': Column('A', 'text', None),
-                'B': Column('B', 'number', '{:,d}'),
+                'B': Column('B', 'number', '{:,}'),
                 'C': Column('C', 'number', '{:,f}'),
             }
         )
@@ -106,8 +106,4 @@ class IntegrationTest(unittest.TestCase):
             {'bar': 'C', 'y': 3, 'group': 1, 'name': 'bar'},
         ])
         # Check axis format is first Y column's format
-        #self.assertEqual(json_dict['axes'][1]['format'], ',d')
-        self.assertEqual(
-            json_dict['axes'][1]['encode']['labels']['update']['text']['signal'],
-            "format(datum.value, ',d')"
-        )
+        self.assertEqual(json_dict['axes'][1]['format'], ',r')
