@@ -25,7 +25,7 @@ def python_format_to_d3_tick_format(python_format: str) -> str:
     # Formatter.parse() returns Iterable[(literal, field_name, format_spec,
     # conversion)]
     specifier = next(Formatter().parse(python_format))[2]
-    if specifier[-1] not in 'bcdoxXneEfFgGn%':
+    if not specifier or specifier[-1] not in 'bcdoxXneEfFgGn%':
         specifier += 'r'
     return specifier
 
