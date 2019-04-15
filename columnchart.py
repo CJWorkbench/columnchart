@@ -189,6 +189,9 @@ class SeriesParams:
                 {
                     "title": self.y_axis_label,
                     "format": self.y_label_format,
+                    "tickMinStep": (
+                        1 if self.y_label_format.endswith('d') else None
+                    ),
                     "orient": "left",
                     "scale": "yscale",
                     "tickSize": 3,
