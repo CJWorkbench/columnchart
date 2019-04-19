@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import json
 from string import Formatter
 from typing import Any, Dict, List
+import numpy as np
 import pandas
 from pandas.api.types import is_numeric_dtype
 
@@ -106,20 +107,26 @@ class SeriesParams:
         # group  bar
         # 0      B      1.0
         #        C      2.0
+        #        D      nan
         # 1      B      2.0
         #        C      3.0
         #        D      6.0
         # 2      B      3.0
         #        C      4.0
         #        D      7.0
-        # Notice there are no NA values. (Yay!)
-        stacked = dataframe.stack()
+        stacked = dataframe.stack(dropna=False)
         stacked.name = 'y'
         stacked.index.names = ['group', 'bar']
 
         # Now convert back to a dataframe. This is the data we'll pass to Vega.
+        #
+        # We need to output null (None) here instead of leaving records empty.
+        # Otherwise, Vega will make some bars thicker than others.
         table = stacked.reset_index()
-        return table.to_dict(orient='records')
+        return [
+            {'group': g, 'bar': b, 'y': None if np.isnan(y) else y}
+            for g, b, y in table.to_records(index=False)
+        ]
 
     def to_vega(self) -> Dict[str, Any]:
         """

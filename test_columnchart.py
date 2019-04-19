@@ -133,6 +133,7 @@ class IntegrationTest(unittest.TestCase):
         )
         # Check values
         self.assertEqual(json_dict['data'][0]['values'], [
+            {'bar': 'B', 'y': None, 'group': 0},
             {'bar': 'C', 'y': 2.0, 'group': 0},
             {'bar': 'B', 'y': 2.0, 'group': 1},
             {'bar': 'C', 'y': 3.0, 'group': 1},
