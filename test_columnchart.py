@@ -2,6 +2,7 @@
 
 from collections import namedtuple
 import unittest
+import numpy as np
 import pandas as pd
 from columnchart import render, migrate_params
 
@@ -78,6 +79,8 @@ class MigrateParamsTest(unittest.TestCase):
 
 
 class IntegrationTest(unittest.TestCase):
+    maxDiff = None
+
     def test_happy_path(self):
         dataframe, error, json_dict = render(
             pd.DataFrame({
@@ -100,10 +103,41 @@ class IntegrationTest(unittest.TestCase):
         )
         # Check values
         self.assertEqual(json_dict['data'][0]['values'], [
-            {'bar': 'B', 'y': 1, 'group': 0, 'name': 'foo'},
-            {'bar': 'B', 'y': 2, 'group': 1, 'name': 'bar'},
-            {'bar': 'C', 'y': 2, 'group': 0, 'name': 'foo'},
-            {'bar': 'C', 'y': 3, 'group': 1, 'name': 'bar'},
+            {'bar': 'B', 'y': 1, 'group': 0},
+            {'bar': 'C', 'y': 2, 'group': 0},
+            {'bar': 'B', 'y': 2, 'group': 1},
+            {'bar': 'C', 'y': 3, 'group': 1},
+        ])
+        # Check axis format is first Y column's format
+        self.assertEqual(json_dict['axes'][1]['format'], ',r')
+
+    def test_drop_nulls(self):
+        dataframe, error, json_dict = render(
+            pd.DataFrame({
+                'A': ['foo', 'bar', None],
+                'B': [np.nan, 2, 3],
+                'C': [2, 3, 4],
+            }),
+            P(
+                x_column='A',
+                y_columns=[
+                    {'column': 'B', 'color': '#bbbbbb'},
+                    {'column': 'C', 'color': '#cccccc'},
+                ]
+            ),
+            input_columns={
+                'A': Column('A', 'text', None),
+                'B': Column('B', 'number', '{:,}'),
+                'C': Column('C', 'number', '{:,f}'),
+            }
+        )
+        # Check values
+        self.assertEqual(json_dict['data'][0]['values'], [
+            {'bar': 'C', 'y': 2.0, 'group': 0},
+            {'bar': 'B', 'y': 2.0, 'group': 1},
+            {'bar': 'C', 'y': 3.0, 'group': 1},
+            {'bar': 'B', 'y': 3.0, 'group': 2},
+            {'bar': 'C', 'y': 4.0, 'group': 2},
         ])
         # Check axis format is first Y column's format
         self.assertEqual(json_dict['axes'][1]['format'], ',r')

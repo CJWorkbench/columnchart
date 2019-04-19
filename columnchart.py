@@ -77,24 +77,49 @@ class SeriesParams:
         Build a dict for Vega's .data.values Array.
 
         Return value is a list of dict records. Each has
-        {x_series.name: 'X Name', 'bar': 'Bar Name', 'y': 1.0}
-        """
-        x_series = self.x_series.series
-        data = {
-            # Only column name guaranteed to be unique: x_series.name
-            self.x_series.name: list(zip(x_series.index, x_series.values)),
-        }
-        for y_column in self.y_columns:
-            data[y_column.name] = y_column.series
-        dataframe = pandas.DataFrame(data)
-        melted = dataframe.melt(self.x_series.name, var_name='bar',
-                                value_name='y')
-        tuples = melted[self.x_series.name]
-        del melted[self.x_series.name]
-        melted['group'] = tuples.map(lambda x: x[0])
-        melted['name'] = tuples.map(lambda x: x[1])
+        {'bar': 'YCOLNAME', 'group': 2, 'y': 1.0}.
 
-        return melted.to_dict(orient='records')
+        The 'group' is an index into x_series (which we ignore here). Each
+        "group" is a value in the X series, which we'll render as a set of
+        bars.
+        """
+
+        # given input like:
+        #    X  B  C    D
+        # 0  x  1  2  NaN
+        # 1  x  2  3  6.0
+        # 2  y  3  4  7.0
+        #
+        # Produce `dataframe` like:
+        #    B  C    D
+        # 0  1  2  NaN
+        # 1  2  3  6.0
+        # 2  3  4  7.0
+        #
+        # (The "index" here is a "group id" -- an index into
+        # self.x_series.series. We call that "group".)
+        dataframe = pandas.DataFrame(
+            {yc.name: yc.series for yc in self.y_columns},
+        )
+
+        # stacked: a series indexed by group, like:
+        # group  bar
+        # 0      B      1.0
+        #        C      2.0
+        # 1      B      2.0
+        #        C      3.0
+        #        D      6.0
+        # 2      B      3.0
+        #        C      4.0
+        #        D      7.0
+        # Notice there are no NA values. (Yay!)
+        stacked = dataframe.stack()
+        stacked.name = 'y'
+        stacked.index.names = ['group', 'bar']
+
+        # Now convert back to a dataframe. This is the data we'll pass to Vega.
+        table = stacked.reset_index()
+        return table.to_dict(orient='records')
 
     def to_vega(self) -> Dict[str, Any]:
         """
