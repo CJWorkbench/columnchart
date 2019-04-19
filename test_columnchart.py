@@ -107,3 +107,7 @@ class IntegrationTest(unittest.TestCase):
         ])
         # Check axis format is first Y column's format
         self.assertEqual(json_dict['axes'][1]['format'], ',r')
+
+
+if __name__ == '__main__':
+    unittest.main()

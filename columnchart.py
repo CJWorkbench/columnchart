@@ -339,14 +339,6 @@ class Form:
                 )
 
             series = table[y_column.column]
-
-            if not is_numeric_dtype(series.dtype):
-                raise ValueError(
-                    f'Cannot plot Y-axis column "{y_column.column}" '
-                    'because it is not numeric. '
-                    'Convert it to a number before plotting it.'
-                )
-
             y_columns.append(YSeries(series, y_column.color))
 
         if not len(table):
