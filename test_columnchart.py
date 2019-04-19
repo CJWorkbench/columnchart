@@ -111,7 +111,7 @@ class IntegrationTest(unittest.TestCase):
         # Check axis format is first Y column's format
         self.assertEqual(json_dict['axes'][1]['format'], ',r')
 
-    def test_drop_nulls(self):
+    def test_output_nulls(self):
         dataframe, error, json_dict = render(
             pd.DataFrame({
                 'A': ['foo', 'bar', None],

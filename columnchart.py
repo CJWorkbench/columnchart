@@ -123,10 +123,12 @@ class SeriesParams:
         # We need to output null (None) here instead of leaving records empty.
         # Otherwise, Vega will make some bars thicker than others.
         table = stacked.reset_index()
-        return [
-            {'group': g, 'bar': b, 'y': None if np.isnan(y) else y}
-            for g, b, y in table.to_records(index=False)
-        ]
+
+        # Change nulls from NaN to None (Object). NaN is invalid JSON.
+        y = table['y'].astype(object)
+        y[y.isnull()] = None
+        table['y'] = y
+        return table.to_dict('records')
 
     def to_vega(self) -> Dict[str, Any]:
         """
