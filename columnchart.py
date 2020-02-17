@@ -7,6 +7,7 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas
 from pandas.api.types import is_numeric_dtype
+from cjwmodule import i18n
 
 
 MaxNBars = 500
@@ -39,6 +40,52 @@ class GentleValueError(ValueError):
     hasn't selected what to chart. So we'll display the error in the iframe:
     we'll be gentle with the user.
     """
+
+
+class RenderingError(ValueError):
+    """
+    A ValueError that should display in red to the user.
+    """
+    
+    @property
+    def i18n_message(self):
+        raise NotImplementedError()
+    
+    def __str__(self):
+        raise NotImplementedError()
+
+
+class TooManyBarsError(RenderingError):
+    def __init__(self, max_n_bars):
+        self.max_n_bars = max_n_bars
+    
+    @property
+    def i18n_message(self):
+        return i18n.trans(
+            "TooManyBarsError.message",
+            'Column chart can visualize a maximum of {MaxNBars} bars',
+            {
+                'MaxNBars': self.max_n_bars
+            }
+        )
+    
+    def __str__(self):
+        return f'Column chart can visualize a maximum of {self.max_n_bars} bars'
+
+class SameAxesError(RenderingError):
+    def __init__(self, column_name):
+        self.column_name = column_name
+    
+    @property
+    def i18n_message(self):
+        return i18n.trans(
+            "SameAxesError.message",
+            'You cannot plot Y-axis column {column_name} because it is the X-axis column',
+            {'column_name': self.column_name}
+        )
+    
+    def __str__(self):
+        return f'You cannot plot Y-axis column {self.column_name} because it is the X-axis column'
 
 
 @dataclass(frozen=True)
@@ -352,10 +399,7 @@ class Form:
         [ ] DOES NOT WORK - nix NA X values
         """
         if len(table.index) >= MaxNBars:
-            raise ValueError(
-                f'Column chart can visualize '
-                f'a maximum of {MaxNBars} bars'
-            )
+            raise TooManyBarsError(MaxNBars)
 
         if not self.x_column:
             raise GentleValueError('Please choose an X-axis column')
@@ -367,10 +411,7 @@ class Form:
         y_columns = []
         for y_column in self.y_columns:
             if y_column.column == self.x_column:
-                raise ValueError(
-                    f'You cannot plot Y-axis column {y_column.column} '
-                    'because it is the X-axis column'
-                )
+                raise SameAxesError(y_column.column)
 
             series = table[y_column.column]
             y_columns.append(YSeries(series, y_column.color))
@@ -421,8 +462,12 @@ def render(table, params, *, input_columns):
         valid_params = form.validate_with_table(table, input_columns)
     except GentleValueError as err:
         return (table, '', {'error': str(err)})
-    except ValueError as err:
-        return (table, str(err), {'error': str(err)})
+    except RenderingError as err:
+        return (
+            table, 
+            err.i18n_message, 
+            {'error': str(err)}
+        )
 
     json_dict = valid_params.to_vega()
     return (table, '', json_dict)
