@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-02-17 14:03+0000\n"
+"POT-Creation-Date: 2020-02-18 18:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -48,13 +48,25 @@ msgstr "Label"
 msgid "_spec.parameters.y_columns.name"
 msgstr "Columns"
 
-#: columnchart.py:64
-msgid "TooManyBarsError.message"
+#: columnchart.py:361
+msgid "tooManyBarsError.message"
 msgstr "Column chart can visualize a maximum of {MaxNBars} bars"
 
-#: columnchart.py:81
-msgid "SameAxesError.message"
+#: columnchart.py:370
+msgid "noXAxisError.message"
+msgstr "Please choose an X-axis column"
+
+#: columnchart.py:375
+msgid "noYAxisError.message"
+msgstr "Please choose a Y-axis column"
+
+#: columnchart.py:385
+msgid "sameAxesError.message"
 msgstr ""
 "You cannot plot Y-axis column {column_name} because it is the X-axis "
 "column"
+
+#: columnchart.py:395
+msgid "nothingToPlotError.message"
+msgstr "no records to plot"
 

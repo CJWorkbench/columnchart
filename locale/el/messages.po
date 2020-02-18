@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-02-18 15:12+0000\n"
+"POT-Creation-Date: 2020-02-18 18:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: el\n"
@@ -48,11 +48,23 @@ msgstr "Ετικέτα"
 msgid "_spec.parameters.y_columns.name"
 msgstr "Στήλες"
 
-#: columnchart.py:64
-msgid "TooManyBarsError.message"
+#: columnchart.py:361
+msgid "tooManyBarsError.message"
 msgstr ""
 
-#: columnchart.py:81
-msgid "SameAxesError.message"
+#: columnchart.py:370
+msgid "noXAxisError.message"
+msgstr ""
+
+#: columnchart.py:375
+msgid "noYAxisError.message"
+msgstr ""
+
+#: columnchart.py:385
+msgid "sameAxesError.message"
+msgstr ""
+
+#: columnchart.py:395
+msgid "nothingToPlotError.message"
 msgstr ""
 

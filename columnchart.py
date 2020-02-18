@@ -35,58 +35,17 @@ def python_format_to_d3_tick_format(python_format: str) -> str:
 class GentleValueError(ValueError):
     """
     A ValueError that should not display in red to the user.
+    
+    The first argument must be an `i18n.I18nMessage`.
 
     On first load, we don't want to display an error, even though the user
     hasn't selected what to chart. So we'll display the error in the iframe:
     we'll be gentle with the user.
     """
-
-
-class RenderingError(ValueError):
-    """
-    A ValueError that should display in red to the user.
-    """
     
     @property
     def i18n_message(self):
-        raise NotImplementedError()
-    
-    def __str__(self):
-        raise NotImplementedError()
-
-
-class TooManyBarsError(RenderingError):
-    def __init__(self, max_n_bars):
-        self.max_n_bars = max_n_bars
-    
-    @property
-    def i18n_message(self):
-        return i18n.trans(
-            "TooManyBarsError.message",
-            'Column chart can visualize a maximum of {MaxNBars} bars',
-            {
-                'MaxNBars': self.max_n_bars
-            }
-        )
-    
-    def __str__(self):
-        return f'Column chart can visualize a maximum of {self.max_n_bars} bars'
-
-class SameAxesError(RenderingError):
-    def __init__(self, column_name):
-        self.column_name = column_name
-    
-    @property
-    def i18n_message(self):
-        return i18n.trans(
-            "SameAxesError.message",
-            'You cannot plot Y-axis column {column_name} because it is the X-axis column',
-            {'column_name': self.column_name}
-        )
-    
-    def __str__(self):
-        return f'You cannot plot Y-axis column {self.column_name} because it is the X-axis column'
-
+        return self.args[0]
 
 @dataclass(frozen=True)
 class XSeries:
@@ -399,25 +358,41 @@ class Form:
         [ ] DOES NOT WORK - nix NA X values
         """
         if len(table.index) >= MaxNBars:
-            raise TooManyBarsError(MaxNBars)
+            raise GentleValueError(i18n.trans(
+                "tooManyBarsError.message",
+                'Column chart can visualize a maximum of {MaxNBars} bars',
+                {
+                    'MaxNBars': MaxNBars
+                }
+            ))
 
         if not self.x_column:
-            raise GentleValueError('Please choose an X-axis column')
+            raise GentleValueError(i18n.trans(
+                "noXAxisError.message",
+                "Please choose an X-axis column"
+            ))
         if not self.y_columns:
-            raise GentleValueError('Please choose a Y-axis column')
+            raise GentleValueError(i18n.trans(
+                "noYAxisError.message",
+                "Please choose a Y-axis column"
+            ))
 
         x_series = XSeries(table[self.x_column].astype(str))
 
         y_columns = []
         for y_column in self.y_columns:
             if y_column.column == self.x_column:
-                raise SameAxesError(y_column.column)
+                raise GentleValueError(i18n.trans(
+                    "sameAxesError.message",
+                    'You cannot plot Y-axis column {column_name} because it is the X-axis column',
+                    {'column_name': y_column.column}
+                ))
 
             series = table[y_column.column]
             y_columns.append(YSeries(series, y_column.color))
 
         if not len(table):
-            raise GentleValueError('no records to plot')
+            raise GentleValueError(i18n.trans('nothingToPlotError.message', 'no records to plot'))
 
         title = self.title or 'Column Chart'
         x_axis_label = self.x_axis_label or x_series.name
@@ -461,12 +436,10 @@ def render(table, params, *, input_columns):
     try:
         valid_params = form.validate_with_table(table, input_columns)
     except GentleValueError as err:
-        return (table, '', {'error': str(err)})
-    except RenderingError as err:
         return (
             table, 
             err.i18n_message, 
-            {'error': str(err)}
+            {'error': "Please correct the error in this step's data or parameters"} # TODO_i18n
         )
 
     json_dict = valid_params.to_vega()
