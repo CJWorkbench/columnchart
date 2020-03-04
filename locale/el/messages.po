@@ -51,20 +51,23 @@ msgstr "Στήλες"
 #: columnchart.py:361
 msgid "tooManyBarsError.message"
 msgstr ""
+"Το γράφημα στηλών μπορεί να οπτικοποιήσει έως {MaxNBars} ράβδους το πολύ."
 
 #: columnchart.py:370
 msgid "noXAxisError.message"
-msgstr ""
+msgstr "Διαλέξτε μια στήλη του άξονα X."
 
 #: columnchart.py:375
 msgid "noYAxisError.message"
-msgstr ""
+msgstr "Διαλέξτε μια στήλη του άξονα Y."
 
 #: columnchart.py:385
 msgid "sameAxesError.message"
 msgstr ""
+"Δεν μπορείτε να σχεδιάσετε την {column_name} ως στήλη του άξονα Y καθότι "
+"είναι η στήλη του άξονα X."
 
 #: columnchart.py:395
 msgid "nothingToPlotError.message"
-msgstr ""
+msgstr "δεν υπάρχουν εγγραφές για σχεδίαση"
 
