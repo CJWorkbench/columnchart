@@ -76,226 +76,172 @@ class SeriesParams(NamedTuple):
 
     def to_vega_data_values(self) -> List[Dict[str, Any]]:
         """
-        Build a dict for Vega's .data.values Array.
+        Build an Array of Object records.
 
-        Return value is a list of dict records. Each has
-        {'bar': 'YCOLNAME', 'group': 2, 'y': 1.0}.
-
-        The 'group' is an index into x_series (which we ignore here). Each
-        "group" is a value in the X series, which we'll render as a set of
-        bars.
+        Each record looks like {'x': 'foo', 'y0': 1, 'y1': 2.3, 'y2': null}.
         """
-
-        # given input like:
-        #    X  B  C    D
-        # 0  x  1  2  NaN
-        # 1  x  2  3  6.0
-        # 2  y  3  4  7.0
-        #
-        # Produce `dataframe` like:
-        #    B  C    D
-        # 0  1  2  NaN
-        # 1  2  3  6.0
-        # 2  3  4  7.0
-        #
-        # (The "index" here is a "group id" -- an index into
-        # self.x_series.series. We call that "group".)
-        dataframe = pd.DataFrame(
-            {yc.name: yc.series for yc in self.y_columns},
+        df = pd.DataFrame(
+            {
+                "x": self.x_series.series,  # str or category
+                # all the rest are number
+                **{
+                    f"y{i}": y_column.series
+                    for i, y_column in enumerate(self.y_columns)
+                },
+            }
         )
-
-        # stacked: a series indexed by group, like:
-        # group  bar
-        # 0      B      1.0
-        #        C      2.0
-        #        D      nan
-        # 1      B      2.0
-        #        C      3.0
-        #        D      6.0
-        # 2      B      3.0
-        #        C      4.0
-        #        D      7.0
-        stacked = dataframe.stack(dropna=False)
-        stacked.name = "y"
-        stacked.index.names = ["group", "bar"]
-
-        # Now convert back to a dataframe. This is the data we'll pass to Vega.
-        #
-        # We need to output null (None) here instead of leaving records empty.
-        # Otherwise, Vega will make some bars thicker than others.
-        table = stacked.reset_index()
-
-        # Change nulls from NaN to None (Object). NaN is invalid JSON.
-        y = table["y"].astype(object)
-        y[y.isnull()] = None
-        table["y"] = y
-        return table.to_dict("records")
+        return [
+            {k: None if pd.isnull(v) else v for k, v in record.items()}
+            for record in df.to_dict(orient="records")
+        ]
 
     def to_vega(self) -> Dict[str, Any]:
         """
         Build a Vega bar chart or grouped bar chart.
         """
+        LABEL_COLOR = "#383838"
+        TITLE_COLOR = "#686768"
+        GRID_COLOR = "#ededed"
+        n_bars = len(self.y_columns)
         ret = {
-            "$schema": "https://vega.github.io/schema/vega/v5.json",
-            "background": "white",
-            "title": {
-                "text": self.title,
-                "offset": 15,
-                "color": "#383838",
-                "font": "Nunito Sans, Helvetica, sans-serif",
-                "fontSize": 20,
-                "fontWeight": "normal",
-            },
-            "data": [
-                {
-                    "name": "table",
-                    "values": self.to_vega_data_values(),
-                }
-            ],
-            "scales": [
-                {
-                    "name": "xscale",
-                    "type": "band",
-                    "domain": {"data": "table", "field": "group"},
-                    "range": "width",
-                    "padding": 0.15,
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": self.title,
+            "config": {
+                "font": "Roboto, Helvetica, sans-serif",
+                "title": {
+                    "offset": 15,
+                    "color": LABEL_COLOR,
+                    "fontSize": 20,
+                    "fontWeight": "normal",
                 },
-                {
-                    # This is a big hack. The idea is: the x-axis "labels.text"
-                    # will be a function that converts a group's _value_ (that
-                    # is, `table.group`) to its _name_ (table.name).
-                    #
-                    # Vega axes are a bit unintuitive here: our main x-axis is
-                    # of _groups_, which have both name and position. The
-                    # position needs "band" and the name needs "ordinal". Our
-                    # only hope is to create two axes.
-                    "name": "xname",
-                    "type": "ordinal",
-                    "domain": {"data": "table", "field": "group"},
-                    "range": self.x_series.series.values.tolist(),
-                },
-                {
-                    "name": "yscale",
-                    "type": "linear",
-                    "domain": {"data": "table", "field": "y"},
-                    "range": "height",
-                    "zero": True,
-                    "nice": True,
-                },
-                {
-                    "name": "color",
-                    "type": "ordinal",
-                    "domain": {"data": "table", "field": "bar"},
-                    "range": [ys.color for ys in self.y_columns],
-                },
-            ],
-            "axes": [
-                {
-                    "title": self.x_axis_label,
-                    "orient": "bottom",
-                    "scale": "xscale",
-                    "tickSize": 0,
-                    "titlePadding": 15,
-                    "titleColor": "#686768",
-                    "titleFontSize": 15,
-                    "titleFontWeight": 100,
-                    "titleFont": "Nunito Sans, Helvetica, sans-serif",
-                    "labelFont": "Nunito Sans, Helvetica, sans-serif",
-                    "labelFontWeight": "normal",
+                "axis": {
+                    "gridColor": GRID_COLOR,
+                    "labelColor": LABEL_COLOR,
                     "labelPadding": 10,
                     "labelFontSize": 12,
-                    "labelColor": "#383838",
-                    "encode": {
-                        "labels": {
-                            "update": {
-                                "text": {
-                                    # [adamhooper, 2018-09-21] I never found
-                                    # docs for this. What a crazy Chrome
-                                    # Inspector session this took....
-                                    "signal": "scale('xname', datum.value)"
-                                }
-                            }
-                        }
-                    },
-                },
-                {
-                    "title": self.y_axis_label,
-                    "format": self.y_label_format,
-                    "tickMinStep": (1 if self.y_label_format.endswith("d") else None),
-                    "orient": "left",
-                    "scale": "yscale",
-                    "tickSize": 3,
-                    "labelOverlap": True,
-                    "titleFontSize": 14,
-                    "titleColor": "#686768",
-                    "titleFontWeight": 100,
-                    "titleFont": "Nunito Sans, Helvetica, sans-serif",
-                    "labelFont": "Nunito Sans, Helvetica, sans-serif",
-                    "labelColor": "#383838",
                     "labelFontWeight": "normal",
-                    "titlePadding": 20,
-                    "labelPadding": 10,
-                    "labelFontSize": 11,
+                    "titleColor": TITLE_COLOR,
+                    "titleFontSize": 15,
+                    "titleFontWeight": "normal",
+                    "titlePadding": 15,
+                    "tickColor": GRID_COLOR,  # fade into grid
+                },
+                "axisX": {"tickSize": 0},
+                "axisY": {"format": self.y_label_format},
+            },
+            "data": {
+                "values": self.to_vega_data_values(),
+            },
+            "transform": [
+                {"fold": [f"y{i}" for i in range(n_bars)]},
+                {
+                    "lookup": "key",
+                    "from": {
+                        "data": {
+                            "values": [
+                                {"key": f"y{i}", "series": y_column.name}
+                                for i, y_column in enumerate(self.y_columns)
+                            ],
+                        },
+                        "key": "key",
+                        "fields": ["series"],
+                    },
                 },
             ],
-            "marks": [
+            "encoding": {
+                "x": {
+                    "field": "x",
+                    "type": "nominal",
+                    "scale": {
+                        "padding": 0.25,  # relative width of gap between bars/groups
+                    },
+                    "title": self.x_axis_label,
+                },
+                "color": {
+                    "field": "series",
+                    "scale": {
+                        "range": [y_column.color for y_column in self.y_columns],
+                    },
+                },
+                "tooltip": [
+                    {"field": "x", "type": "nominal", "title": self.x_axis_label},
+                    *[
+                        {
+                            "field": f"y{i}",
+                            "type": "quantitative",
+                            "title": y_column.name,
+                        }
+                        for i, y_column in enumerate(self.y_columns)
+                    ],
+                ],
+            },
+            "layer": [
                 {
-                    "type": "group",
-                    "from": {
-                        "facet": {
-                            "data": "table",
-                            "name": "facet",
-                            "groupby": "group",
-                        }
+                    "mark": {
+                        "type": "bar",
+                        "width": {"expr": f'bandwidth("x") / {n_bars}'},
+                        "xOffset": {
+                            "expr": f'bandwidth("x") * (toNumber(slice(datum.key, 1)) - ({n_bars - 1} * 0.5)) / {n_bars}'
+                        },
                     },
-                    "encode": {
-                        "enter": {
-                            "x": {"scale": "xscale", "field": "group"},
-                        }
-                    },
-                    "signals": [{"name": "width", "update": "bandwidth('xscale')"}],
-                    "scales": [
-                        {
-                            "name": "pos",
-                            "type": "band",
-                            "range": "width",
-                            "domain": {"data": "facet", "field": "bar"},
-                        }
-                    ],
-                    "marks": [
-                        {
-                            "name": "bars",
-                            "from": {"data": "facet"},
-                            "type": "rect",
-                            "encode": {
-                                "enter": {
-                                    "x": {"scale": "pos", "field": "bar"},
-                                    "width": {"scale": "pos", "band": 1},
-                                    "y": {"scale": "yscale", "field": "y"},
-                                    "y2": {"scale": "yscale", "value": 0},
-                                    "fill": {"scale": "color", "field": "bar"},
-                                }
+                    "encoding": {
+                        "y": {
+                            "field": "value",
+                            "type": "quantitative",
+                            "stack": None,
+                            "title": self.y_axis_label,
+                        },
+                        "opacity": {
+                            # When hovering over an X value, highlight its Y values
+                            "condition": {
+                                "test": {
+                                    "param": "hover",
+                                    "empty": True,
+                                },
+                                "value": 1,
                             },
-                        }
+                            "value": 0.7,
+                        },
+                    },
+                },
+                {
+                    "mark": {
+                        "type": "rule",
+                        "opacity": 0,
+                    },
+                    "params": [
+                        {
+                            "name": "hover",
+                            "select": {
+                                "type": "point",
+                                "encodings": ["x"],
+                                "on": "mousemove",
+                                "nearest": True,
+                                "clear": "mouseout",
+                                "toggle": False,
+                            },
+                        },
                     ],
-                }
+                },
             ],
         }
 
+        if self.y_label_format.endswith("d"):
+            ret["config"]["axisY"]["tickMinStep"] = 1
+
         if len(self.y_columns) > 1:
-            ret["legends"] = [
-                {
-                    "fill": "color",
-                    "symbolType": "circle",
-                    "padding": 15,
-                    "offset": 0,
-                    "labelFontSize": 12,
-                    "rowPadding": 10,
-                    "labelFont": "Nunito Sans, Helvetica, sans-serif",
-                    "labelColor": "#383838",
-                    "labelFontWeight": "normal",
-                },
-            ]
+            ret["encoding"]["color"]["legend"] = {
+                "symbolType": "circle",
+                "padding": 15,
+                "offset": 0,
+                "labelColor": LABEL_COLOR,
+                "labelFontSize": 12,
+                "labelFontWeight": "normal",
+                "rowPadding": 10,
+                "title": None,
+            }
+        else:
+            ret["encoding"]["color"]["legend"] = None
 
         return ret
 
@@ -335,7 +281,7 @@ class Form(NamedTuple):
         [ ] Error if a Y column is the X column
         [ ] Error if a Y column is not numeric
         [ ] Default title, X and Y axis labels
-        [ ] DOES NOT WORK - nix NA X values
+        [ ] Nix null X values
         """
         if len(table.index) >= MaxNBars:
             raise GentleValueError(
@@ -355,7 +301,16 @@ class Form(NamedTuple):
                 i18n.trans("noYAxisError.message", "Please choose a Y-axis column")
             )
 
-        x_series = XSeries(table[self.x_column].astype(str))
+        x_series_with_nulls = table[self.x_column]
+        x_mask = ~(pd.isna(x_series_with_nulls))
+        x_series = XSeries(
+            pd.Series(x_series_with_nulls[x_mask], index=None, name=self.x_column)
+        )
+
+        if not len(x_series.series):
+            raise GentleValueError(
+                i18n.trans("nothingToPlotError.message", "no records to plot")
+            )
 
         y_columns = []
         for y_column in self.y_columns:
@@ -368,13 +323,11 @@ class Form(NamedTuple):
                     )
                 )
 
-            series = table[y_column.column]
-            y_columns.append(YSeries(series, y_column.color))
-
-        if not len(table):
-            raise GentleValueError(
-                i18n.trans("nothingToPlotError.message", "no records to plot")
+            y_series_with_nulls = table[y_column.column]
+            y_series = pd.Series(
+                y_series_with_nulls[x_mask], index=None, name=y_column.column
             )
+            y_columns.append(YSeries(y_series, y_column.color))
 
         title = self.title or "Column Chart"
         x_axis_label = self.x_axis_label or x_series.name
