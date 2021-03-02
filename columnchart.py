@@ -124,10 +124,17 @@ class SeriesParams(NamedTuple):
                     "titleFontSize": 15,
                     "titleFontWeight": "normal",
                     "titlePadding": 15,
+                },
+                "axisX": {
+                    "tickSize": 0,
+                    "labelAngle": 0,
+                    "labelFlush": True,
+                    "labelAlign": "center",
+                },
+                "axisY": {
+                    "format": self.y_label_format,
                     "tickColor": GRID_COLOR,  # fade into grid
                 },
-                "axisX": {"tickSize": 0},
-                "axisY": {"format": self.y_label_format},
             },
             "data": {
                 "values": self.to_vega_data_values(),
@@ -232,8 +239,6 @@ class SeriesParams(NamedTuple):
         if len(self.y_columns) > 1:
             ret["encoding"]["color"]["legend"] = {
                 "symbolType": "circle",
-                "padding": 15,
-                "offset": 0,
                 "labelColor": LABEL_COLOR,
                 "labelFontSize": 12,
                 "labelFontWeight": "normal",

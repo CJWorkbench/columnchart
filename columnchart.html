@@ -136,17 +136,19 @@
 
       function slantXAxisLabelsIfNeeded ({ spec, view }) {
         if (areXAxisLabelsOverlapping()) {
-          const newSpec = JSON.parse(JSON.stringify(spec))
-          const xAxis = newSpec.axes[0]
-          Object.assign(xAxis, {
-            labelAlign: 'right',
-            labelBaseline: 'middle',
-            labelAngle: -45,
-            tickSize: 3,
-            labelFontWeight: 400,
-            labelFontSize: 12,
-            labelColor: '#383838'
-          })
+          const newSpec = {
+            ...spec,
+            config: {
+              ...spec.config,
+              axisX: {
+                ...spec.config.axisX,
+                labelAlign: 'right',
+                labelBaseline: 'middle',
+                labelAngle: -45,
+                tickSize: 3
+              }
+            }
+          }
           renderSpec(newSpec)
         }
       }

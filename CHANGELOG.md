@@ -1,3 +1,12 @@
+2021-03-01.01
+-------------
+
+* Interaction: on hover, highlight the closest X value and all Y values, and
+  show their values in a tooltip.
+* Change font to Roboto, to match Workbench.
+* HTML: nix obsolete styling of the "ellipsis" button and fix its position.
+* Legend: nix top and right padding by reverting to Vega defaults
+
 2021-01-20.01
 -------------
 
