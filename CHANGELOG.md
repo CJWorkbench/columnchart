@@ -6,6 +6,8 @@
 * Change font to Roboto, to match Workbench.
 * HTML: nix obsolete styling of the "ellipsis" button and fix its position.
 * Legend: nix top and right padding by reverting to Vega defaults
+* When title is not supplied, do not show "Column Chart". (It looked English
+  in non-English locales.)
 
 2021-01-20.01
 -------------

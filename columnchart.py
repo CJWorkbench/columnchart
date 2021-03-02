@@ -278,25 +278,15 @@ class Form(NamedTuple):
         Create a SeriesParams ready for charting, or raises ValueError.
 
         Features ([tested?]):
-        [ ] Error if X column is missing
-        [ ] Error if no Y columns chosen
-        [ ] Error if no rows
-        [ ] Error if too many bars
-        [ ] Error if a Y column is missing
-        [ ] Error if a Y column is the X column
-        [ ] Error if a Y column is not numeric
-        [ ] Default title, X and Y axis labels
-        [ ] Nix null X values
+        [x] Error if X column is missing
+        [x] Error if no Y columns chosen
+        [x] Error if no rows
+        [x] Nix null X values
+        [x] Error if too many bars
+        [x] What if a Y column is not numeric? framework saves us
+        [x] What if a Y column is the X column? framework saves us: x is text, y is numeric
+        [x] Default title, X and Y axis labels
         """
-        if len(table.index) >= MaxNBars:
-            raise GentleValueError(
-                i18n.trans(
-                    "tooManyBarsError.message",
-                    "Column chart can visualize a maximum of {MaxNBars} bars",
-                    {"MaxNBars": MaxNBars},
-                )
-            )
-
         if not self.x_column:
             raise GentleValueError(
                 i18n.trans("noXAxisError.message", "Please choose an X-axis column")
@@ -312,6 +302,15 @@ class Form(NamedTuple):
             pd.Series(x_series_with_nulls[x_mask], index=None, name=self.x_column)
         )
 
+        if len(x_series.series) > MaxNBars:
+            raise GentleValueError(
+                i18n.trans(
+                    "tooManyBarsError.message",
+                    "Column chart can visualize a maximum of {MaxNBars} bars",
+                    {"MaxNBars": MaxNBars},
+                )
+            )
+
         if not len(x_series.series):
             raise GentleValueError(
                 i18n.trans("nothingToPlotError.message", "no records to plot")
@@ -319,22 +318,12 @@ class Form(NamedTuple):
 
         y_columns = []
         for y_column in self.y_columns:
-            if y_column.column == self.x_column:
-                raise GentleValueError(
-                    i18n.trans(
-                        "sameAxesError.message",
-                        "You cannot plot Y-axis column {column_name} because it is the X-axis column",
-                        {"column_name": y_column.column},
-                    )
-                )
-
             y_series_with_nulls = table[y_column.column]
             y_series = pd.Series(
                 y_series_with_nulls[x_mask], index=None, name=y_column.column
             )
             y_columns.append(YSeries(y_series, y_column.color))
 
-        title = self.title or "Column Chart"
         x_axis_label = self.x_axis_label or x_series.name
         y_axis_label = self.y_axis_label or y_columns[0].name
         y_label_format = python_format_to_d3_tick_format(
@@ -342,7 +331,7 @@ class Form(NamedTuple):
         )
 
         return SeriesParams(
-            title=title,
+            title=self.title,
             x_axis_label=x_axis_label,
             y_axis_label=y_axis_label,
             x_series=x_series,

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-02 14:29+0000\n"
+"POT-Creation-Date: 2021-03-02 15:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: el\n"
@@ -48,23 +48,23 @@ msgstr "Ετικέτα"
 msgid "_spec.parameters.y_columns.name"
 msgstr "Στήλες"
 
-#: columnchart.py:293
-msgid "tooManyBarsError.message"
-msgstr "Το γράφημα στηλών μπορεί να οπτικοποιήσει έως {MaxNBars} ράβδους το πολύ."
-
-#: columnchart.py:302
+#: columnchart.py:292
 msgid "noXAxisError.message"
 msgstr "Διαλέξτε μια στήλη του άξονα X."
 
-#: columnchart.py:306
+#: columnchart.py:296
 msgid "noYAxisError.message"
 msgstr "Διαλέξτε μια στήλη του άξονα Y."
 
-#: columnchart.py:317
+#: columnchart.py:307
+msgid "tooManyBarsError.message"
+msgstr "Το γράφημα στηλών μπορεί να οπτικοποιήσει έως {MaxNBars} ράβδους το πολύ."
+
+#: columnchart.py:316
 msgid "nothingToPlotError.message"
 msgstr "δεν υπάρχουν εγγραφές για σχεδίαση"
 
-#: columnchart.py:324
+#: _deprecated_i18n_messages.py:7
 msgid "sameAxesError.message"
 msgstr ""
 "Δεν μπορείτε να σχεδιάσετε την {column_name} ως στήλη του άξονα Y καθότι "
