@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-03-02 15:36+0000\n"
+"POT-Creation-Date: 2021-03-04 17:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: el\n"
@@ -48,19 +48,19 @@ msgstr "Ετικέτα"
 msgid "_spec.parameters.y_columns.name"
 msgstr "Στήλες"
 
-#: columnchart.py:292
+#: columnchart.py:293
 msgid "noXAxisError.message"
 msgstr "Διαλέξτε μια στήλη του άξονα X."
 
-#: columnchart.py:296
+#: columnchart.py:297
 msgid "noYAxisError.message"
 msgstr "Διαλέξτε μια στήλη του άξονα Y."
 
-#: columnchart.py:307
+#: columnchart.py:308
 msgid "tooManyBarsError.message"
 msgstr "Το γράφημα στηλών μπορεί να οπτικοποιήσει έως {MaxNBars} ράβδους το πολύ."
 
-#: columnchart.py:316
+#: columnchart.py:317
 msgid "nothingToPlotError.message"
 msgstr "δεν υπάρχουν εγγραφές για σχεδίαση"
 

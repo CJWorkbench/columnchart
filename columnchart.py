@@ -163,6 +163,7 @@ class SeriesParams(NamedTuple):
                         "padding": 0.25,  # relative width of gap between bars/groups
                     },
                     "title": self.x_axis_label,
+                    "sort": None,
                 },
                 "color": {
                     "field": "series",
